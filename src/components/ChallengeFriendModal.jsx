@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { BASE_URL } from "../constants"; // Use your constants file
+import { BASE_URL } from "../constants";
+import "./ChallengeFriendModal.css";
 
 const ChallengeFriendModal = ({ onClose }) => {
   const [username, setUsername] = useState("");
   const [inviteLink, setInviteLink] = useState("");
   const [score, setScore] = useState(null);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleInvite = async () => {
     if (!username.trim()) {
@@ -14,19 +16,43 @@ const ChallengeFriendModal = ({ onClose }) => {
       return;
     }
 
+    setLoading(true);
+    setError(""); // Reset errors
+
     try {
-      const response = await axios.get(`${BASE_URL}/api/v1/addfriend/invite/${username}`);
-      if (response.data.inviteLink.includes("Error")) {
-        setError("Error generating invite link.");
-        setInviteLink("");
-        setScore(0);
-      } else {
-        setInviteLink(response.data.inviteLink);
-        setScore(response.data.score);
-        setError(""); // Clear any previous errors
+      const authToken = localStorage.getItem("authToken");
+
+      if (!authToken) {
+        setError("Authentication required. Please log in.");
+        setLoading(false);
+        return;
       }
+
+      const response = await axios.get(
+        `${BASE_URL}/api/v1/addfriend/invite/${username}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      console.log("API Response:", response.data); // Debugging
+
+      if (!response.data || !response.data.inviteLink) {
+        throw new Error("Invalid response from server.");
+      }
+
+      setInviteLink(response.data.inviteLink);
+      setScore(response.data.score || 0);
     } catch (err) {
-      setError("Failed to generate invite link. Try again.");
+      console.error(
+        "Error fetching invite:",
+        err.response ? err.response.data : err.message
+      );
+      setError("Failed to generate invite link. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -39,7 +65,7 @@ const ChallengeFriendModal = ({ onClose }) => {
     <div className="modal-overlay">
       <div className="modal-content">
         <h2>Challenge a Friend</h2>
-        
+
         <label>Enter Friend's Username:</label>
         <input
           type="text"
@@ -47,21 +73,29 @@ const ChallengeFriendModal = ({ onClose }) => {
           onChange={(e) => setUsername(e.target.value)}
           placeholder="Enter username..."
         />
-        
-        <button onClick={handleInvite}>Generate Invite Link</button>
-        
+
+        <button onClick={handleInvite} disabled={loading}>
+          {loading ? "Generating..." : "Generate Invite Link"}
+        </button>
+
         {error && <p className="error-text">{error}</p>}
 
         {inviteLink && (
           <div className="invite-section">
-            <p><strong>Username:</strong> {username}</p>
-            <p><strong>Score:</strong> {score}</p>
+            <p>
+              <strong>Username:</strong> {username}
+            </p>
+            <p>
+              <strong>Score:</strong> {score}
+            </p>
             <input type="text" value={inviteLink} readOnly />
             <button onClick={copyToClipboard}>Copy Link</button>
           </div>
         )}
 
-        <button className="close-btn" onClick={onClose}>Close</button>
+        <button className="close-btn" onClick={onClose}>
+          Close
+        </button>
       </div>
     </div>
   );

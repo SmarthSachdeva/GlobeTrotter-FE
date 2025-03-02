@@ -18,7 +18,9 @@ function Leaderboard() {
     setLoading(true);
     setError(null);
 
-    const authToken = localStorage.getItem("authToken");
+    let authToken = localStorage.getItem("authToken");
+
+    console.log("Auth Token:", authToken); // ✅ Debugging Step
 
     if (!authToken) {
       setError("You need to log in to view the leaderboard.");
@@ -27,17 +29,21 @@ function Leaderboard() {
     }
 
     try {
-      const response = await fetch(`${BASE_URL}/leaderboard/top?limit=${selectedLimit}`, {
+      const response = await fetch(`${BASE_URL}/api/v1/leaderboard/top?limit=${selectedLimit}`, {
         headers: {
-          Authorization: `Bearer ${authToken}`, // Ensure correct format
+          Authorization: `Bearer ${authToken}`,
         },
       });
 
+      console.log("Response Status:", response.status); // ✅ Debugging Step
+
       if (response.status === 401) {
-        localStorage.removeItem("authToken"); // Clear invalid token
-        alert("Session expired. Please log in again.");
-        navigate("/login"); // Redirect to login
-        return;
+        // Try refreshing the token (if supported by backend)
+        authToken = await refreshToken();
+        if (!authToken) return;
+
+        // Retry API call with refreshed token
+        return fetchLeaderboard(selectedLimit);
       }
 
       if (!response.ok) {
@@ -45,6 +51,7 @@ function Leaderboard() {
       }
 
       const data = await response.json();
+      console.log("Leaderboard Data:", data); // ✅ Debugging Step
 
       if (!Array.isArray(data)) {
         throw new Error("Invalid data format received from API");
@@ -58,6 +65,37 @@ function Leaderboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // 🔄 Token Refresh Function (Only works if backend supports refresh tokens)
+  const refreshToken = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/auth/refresh`, {
+        method: "POST",
+        credentials: "include", // Required if refresh token is stored in HTTP-only cookies
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("authToken", data.accessToken);
+        console.log("Token refreshed successfully!");
+        return data.accessToken;
+      } else {
+        console.error("Failed to refresh token. Logging out.");
+        handleLogout();
+      }
+    } catch (error) {
+      console.error("Error refreshing token:", error);
+      handleLogout();
+    }
+    return null;
+  };
+
+  // 🚪 Logout function (Clears session and redirects user)
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    alert("Session expired. Please log in again.");
+    navigate("/login");
   };
 
   return (

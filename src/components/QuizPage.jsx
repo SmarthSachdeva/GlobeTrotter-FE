@@ -14,7 +14,7 @@ const QuizPage = () => {
   // Fetch question on page load
   useEffect(() => {
     axios.get(`${BASE_URL}/api/v1/quiz/getquestion`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
     })
     .then(response => setQuestion(response.data))
     .catch(error => console.error("Error fetching question:", error));
@@ -31,7 +31,7 @@ const QuizPage = () => {
       clueId: question.clueId,
       guessedPlaceId: selectedOption
     }, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+      headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` }
     })
     .then(response => {
       setResultData(response.data);

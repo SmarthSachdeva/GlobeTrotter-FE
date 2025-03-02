@@ -14,7 +14,7 @@ function Leaderboard() {
     try {
       const response = await fetch(`${BASE_URL}/leaderboard/top?limit=${selectedLimit}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // Sending JWT
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
       });
 

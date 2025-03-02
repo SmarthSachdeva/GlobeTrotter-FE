@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { BASE_URL } from "../constants";
+import { useNavigate } from "react-router-dom"; // Redirect on unauthorized error
 import "./Leaderboard.css";
 
 function Leaderboard() {
@@ -7,6 +8,7 @@ function Leaderboard() {
   const [limit, setLimit] = useState(10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate(); // Used to redirect user to login page if unauthorized
 
   useEffect(() => {
     fetchLeaderboard(limit);
@@ -14,14 +16,29 @@ function Leaderboard() {
 
   const fetchLeaderboard = async (selectedLimit) => {
     setLoading(true);
-    setError(null); // Reset error before fetching
+    setError(null);
+
+    const authToken = localStorage.getItem("authToken");
+
+    if (!authToken) {
+      setError("You need to log in to view the leaderboard.");
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch(`${BASE_URL}/leaderboard/top?limit=${selectedLimit}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          Authorization: `Bearer ${authToken}`, // Ensure correct format
         },
       });
+
+      if (response.status === 401) {
+        localStorage.removeItem("authToken"); // Clear invalid token
+        alert("Session expired. Please log in again.");
+        navigate("/login"); // Redirect to login
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
@@ -37,7 +54,7 @@ function Leaderboard() {
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
       setError(error.message);
-      setLeaderboard([]); // Reset leaderboard in case of an error
+      setLeaderboard([]);
     } finally {
       setLoading(false);
     }

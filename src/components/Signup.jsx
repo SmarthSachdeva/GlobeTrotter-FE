@@ -33,7 +33,7 @@ const Signup = () => {
 
       if (data.registered) {
         alert("Signup successful! Redirecting to login...");
-        navigate("/login"); // Redirect to Login page after successful signup
+        navigate("/"); // Redirect to Login page after successful signup
       } else {
         alert(data.message || "Signup failed. Please try again.");
       }

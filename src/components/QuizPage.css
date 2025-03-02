@@ -1,6 +1,8 @@
 .quiz-container {
   text-align: center;
   padding: 20px;
+  font-family: Arial, sans-serif;
+  color: black; /* Ensures all text is readable */
 }
 
 .options-container {
@@ -11,27 +13,40 @@
 }
 
 .options-container button {
-  padding: 10px;
+  padding: 12px;
   font-size: 16px;
   cursor: pointer;
   border: 1px solid #ccc;
   border-radius: 5px;
-  background-color: #f0f0f0;
+  background-color: #f8f9fa;
+  color: black;
+  transition: background 0.3s ease-in-out, transform 0.2s;
+}
+
+.options-container button:hover {
+  background-color: #e0e0e0;
 }
 
 .options-container button.selected {
   background-color: #007bff;
   color: white;
+  font-weight: bold;
 }
 
 .submit-btn {
   margin-top: 20px;
-  padding: 10px 20px;
+  padding: 12px 25px;
   background-color: #28a745;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s ease-in-out;
+}
+
+.submit-btn:hover {
+  background-color: #218838;
 }
 
 .result-popup {
@@ -39,12 +54,13 @@
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  background-color: #f9f9f9;
+  background-color: #fdfdfd;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .result-popup h3 {
   margin-bottom: 10px;
+  color: black; /* Ensure headings are visible */
 }
 
 .result-buttons {
@@ -55,14 +71,17 @@
 }
 
 .result-buttons button {
-  padding: 10px 15px;
+  padding: 12px 18px;
   background-color: #007bff;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s ease-in-out, transform 0.2s;
 }
 
 .result-buttons button:hover {
   background-color: #0056b3;
+  transform: scale(1.05);
 }

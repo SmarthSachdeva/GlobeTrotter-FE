@@ -70,7 +70,7 @@ const Signup = () => {
 
       <p>
         Already have an account?{" "}
-        <span className="auth-link" onClick={() => navigate("/login")}>
+        <span className="auth-link" onClick={() => navigate("/")}>
           Login here
         </span>
       </p>

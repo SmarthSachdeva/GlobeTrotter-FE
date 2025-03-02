@@ -5,12 +5,12 @@ import "./Signup.css";
 
 const Signup = () => {
   const navigate = useNavigate();
-
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -18,28 +18,30 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
-      const response = await fetch(`${BASE_URL}/users/register`, {
+      const response = await fetch(`${BASE_URL}/api/v1/users/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
         },
+        body: JSON.stringify(formData), // Sending username, email, and password in the body
       });
 
       const data = await response.json();
 
       if (data.registered) {
+        alert("Signup successful! Redirecting to login...");
         navigate("/login"); // Redirect to Login page after successful signup
       } else {
-        alert(data.message);
+        alert(data.message || "Signup failed. Please try again.");
       }
     } catch (error) {
       console.error("Signup error:", error);
       alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,9 +56,16 @@ const Signup = () => {
         <input type="email" name="email" onChange={handleChange} required />
 
         <label>Password:</label>
-        <input type="password" name="password" onChange={handleChange} required />
+        <input
+          type="password"
+          name="password"
+          onChange={handleChange}
+          required
+        />
 
-        <button type="submit">Sign Up</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Signing up..." : "Sign Up"}
+        </button>
       </form>
 
       <p>

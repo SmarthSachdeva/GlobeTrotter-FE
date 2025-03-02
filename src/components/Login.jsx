@@ -14,13 +14,13 @@ const Login = () => {
     setLoading(true);
 
     try {
+      // Sending email and password in the request body
       const response = await fetch(`${BASE_URL}/api/v1/users/login`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          email: email,
-          password: password,
+          "Content-Type": "application/json", // Content type should be JSON
         },
+        body: JSON.stringify({ email, password }), // Sending email and password in the body
       });
 
       if (!response.ok) {
